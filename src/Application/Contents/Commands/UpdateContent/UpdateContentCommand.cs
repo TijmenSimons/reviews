@@ -41,7 +41,9 @@ public class UpdateContentCommandHandler : IRequestHandler<UpdateContentCommand,
 			.FirstOrDefaultAsync(content => content.Id.Equals(request.Id), cancellationToken) ?? throw new NotFoundException(nameof(Content), request.Id);
 
 		var categories = await _context.Categories
-			.Where(category => request.CategoryIds.Select(ci => ci.Id).Contains(category.Id)).ToListAsync(cancellationToken);
+			.Where(category => request.CategoryIds.Select(ci => ci.Id).Contains(category.Id))
+			.Include(category => category.DefaultValue)
+			.ToListAsync(cancellationToken);
 
 		content.Title = request.Title;
 		content.Description = request.Description;

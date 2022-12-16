@@ -20,8 +20,6 @@ public record UpdateDefaultCategoryCommand : IRequest<DefaultCategoryDto>
 	public Guid? ImageId { get; set; }
 
 	public Guid? PartnerId { get; set; }
-
-	public Guid? ParentId { get; set; }
 }
 
 public class UpdateDefaultCategoryCommandHandler : IRequestHandler<UpdateDefaultCategoryCommand, DefaultCategoryDto>
@@ -54,65 +52,6 @@ public class UpdateDefaultCategoryCommandHandler : IRequestHandler<UpdateDefault
 			: await _context.Partners
 				.FirstOrDefaultAsync(partner => partner.Id.Equals(request.PartnerId), cancellationToken) ?? throw new NotFoundException(nameof(DefaultCategory), request.PartnerId);
 		
-
-		if (!defaultCategory.ParentCategory.Id.Equals(request.ParentId))
-		{
-			var hasDefaultsCategoriesToBeUpdated = await _context.Categories
-				.Include(c => c.ChildCategories)
-				.Where(c => c.HasDefaults == true)
-				.ToListAsync(cancellationToken);
-
-			// Don't search for all children because data should always be 2 children deep at max.
-			foreach (var hasDefaultsCategory in hasDefaultsCategoriesToBeUpdated)
-			{
-				var substituteCategories = await _context.Categories
-					.Where(c => c.DefaultValue != null && c.DefaultValue.Id.Equals(defaultCategory.Id))
-					.Include(c => c.ParentCategory).ThenInclude(c => c.ParentCategory)
-					.Include(c => c.ParentCategory).ThenInclude(c => c.ParentCategory).ThenInclude(c => c.DefaultValue)
-					.Include(c => c.ParentCategory).ThenInclude(c => c.DefaultValue)
-					.ToListAsync(cancellationToken) ?? throw new NotFoundException($"Couldn't find substitute categories"); ;
-
-				foreach (var item in substituteCategories)
-				{
-					Console.WriteLine(item.Name);
-					Console.WriteLine(item.ParentCategory.DefaultValue.Name);
-					Console.WriteLine(item.ParentCategory.ParentCategory.DefaultValue.Name);
-				}
-
-				var substituteCategory = await _context.Categories
-					.Where(c => c.DefaultValue != null && c.DefaultValue.Id.Equals(defaultCategory.Id))
-					.Include(c => c.ParentCategory).ThenInclude(c => c!.ParentCategory)
-					.Where(c => c.ParentCategory != null && 
-						(
-							(c.ParentCategory.HasDefaults && c.ParentCategory.Id.Equals(hasDefaultsCategory.Id)) ||
-							(c.ParentCategory.ParentCategory != null && c.ParentCategory.ParentCategory.HasDefaults && c.ParentCategory.ParentCategory.Id.Equals(hasDefaultsCategory.Id)))
-						)
-					.FirstOrDefaultAsync(cancellationToken) ?? throw new NotFoundException($"Couldn't find substitute category for: {defaultCategory.Name} in {hasDefaultsCategory.Name}"); ;
-
-				Console.WriteLine(substituteCategory);
-
-				if (defaultCategory.IsRoot)
-					substituteCategory.ParentCategory = hasDefaultsCategory;
-				else
-				{
-					var childCategories = await _context.Categories
-						.Where(cc => hasDefaultsCategory.ChildCategories.Select(ci => ci.Id).Contains(cc.Id))
-						.Include(c => c.DefaultValue).ThenInclude(c => c!.ParentCategory)
-						.Include(c => c.ChildCategories)
-						.ToListAsync(cancellationToken);
-
-					var childChildCategoryIds = childCategories.SelectMany(cc => cc.ChildCategories).Select(cc => cc.Id);
-
-					substituteCategory.ParentCategory = childCategories.FirstOrDefault(c => c.DefaultValue!.Id.Equals(defaultCategory.ParentCategory!.Id))
-												 ?? await _context.Categories
-													 .Where(c => childChildCategoryIds.Contains(c.Id))
-													 .Include(c => c.DefaultValue).ThenInclude(c => c!.ParentCategory)
-													 .Include(c => c.ChildCategories)
-													 .FirstOrDefaultAsync(c => c.DefaultValue!.Id.Equals(defaultCategory.ParentCategory!.Id), cancellationToken)
-												 ?? throw new NotFoundException($"Couldn't find parent category for: {defaultCategory.Name} in {hasDefaultsCategory.Name}");
-				}
-			}
-		}
 		await _context.SaveChangesAsync(cancellationToken);
 
 		return await _context.DefaultCategories

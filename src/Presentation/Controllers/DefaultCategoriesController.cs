@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Template.Application.DefaultCategories.Commands.CreateDefaultCategory;
 using Template.Application.DefaultCategories.Commands.DeleteDefaultCategories;
-using Template.Application.DefaultCategories.Commands.LinkDefaultCategory;
 using Template.Application.DefaultCategories.Commands.UpdateDefaultCategory;
 using Template.Application.DefaultCategories.Queries.GetDefaultCategories;
 using Template.Application.DefaultCategories.Queries.GetDefaultCategory;
@@ -41,35 +40,17 @@ public class DefaultCategoriesController : ApiControllerBase
 		return await Mediator.Send(command);
 	}
 
-	// Functies werken, maar missen een belangrijk deel, maar ik wil eerst al data kunnen aanmaken.
-	//[HttpDelete("{id:guid}")]
-	//public async Task<ActionResult> Delete(Guid id)
-	//{
-	//	await Mediator.Send(new DeleteDefaultCategoryCommand(id));
+   [HttpDelete("{id:guid}")]
+	public async Task<ActionResult> Delete(Guid id)
+	{
+		await Mediator.Send(new DeleteDefaultCategoryCommand(id));
 
-	//	return NoContent();
-	//}
+		return NoContent();
+	}
 
 	[HttpGet("{id:guid}/childcategories")]
 	public async Task<IActionResult> GetChildren([FromRoute]Guid id)
 	{
 		return Ok(await Mediator.Send(new GetChildDefaultCategoriesQuery { Id = id }));
 	}
-
-	//[HttpPatch("{id:guid}/childcategories")]
-	//public async Task<IActionResult> LinkChildren(Guid id, LinkChildDefaultCategoryCommand command)
-	//{
-	//	if (!id.Equals(command.ParentId))
-	//		return BadRequest();
-
-	//	await Mediator.Send(command);
-	//	return Ok();
-	//}
-
-	//[HttpDelete("{id:guid}/childcategories")]
-	//public async Task<IActionResult> DeleteLinkedChildren(Guid id, DeleteChildDefaultCategoryCommand command)
-	//{
-	//	await Mediator.Send(command);
-	//	return Ok();
-	//}
 }

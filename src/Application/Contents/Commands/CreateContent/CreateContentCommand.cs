@@ -42,7 +42,9 @@ public class CreateContentCommandHandler : IRequestHandler<CreateContentCommand,
 		};
 
 		var categories = await _context.Categories
-			.Where(category => request.CategoryIds.Select(ci => ci.Id).Contains(category.Id)).ToListAsync(cancellationToken);
+			.Where(category => request.CategoryIds.Select(ci => ci.Id).Contains(category.Id))
+			.Include(category => category.DefaultValue)
+			.ToListAsync(cancellationToken);
 
 		if (request.CategoryIds.Count != categories.Count)
 		{

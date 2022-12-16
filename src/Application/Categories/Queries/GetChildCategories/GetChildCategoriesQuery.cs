@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Template.Application.Common.Exceptions;
 using Template.Application.Common.Interfaces;
+using Template.Application.Common.Mappings;
 using Template.Application.Dtos;
 using Template.Domain.Entities;
 
@@ -29,13 +30,8 @@ public class GetChildCategoriesQueryHandler : IRequestHandler<GetChildCategories
 	public async Task<ICollection<CategoryDto>> Handle(GetChildCategoriesQuery request, CancellationToken cancellationToken)
 	{
 		
-		var category = await _context.Categories
-			.Include(category => category.ChildCategories).ThenInclude(category => category.Image)
-			.Include(category => category.Image)
-			.Include(category => category.ChildCategories).ThenInclude(category => category.DefaultValue)
-			.Include(category => category.DefaultValue)
-			.FirstOrDefaultAsync(category => category.Id.Equals(request.Id), cancellationToken: cancellationToken) ?? throw new NotFoundException(nameof(Category), request.Id);
-
-		return _mapper.Map<ICollection<CategoryDto>>(category.ChildCategories); 
+		return await _context.Categories
+			.Where(category => category.ParentCategory.Id.Equals(request.Id))
+			.ProjectToListAsync<CategoryDto>(_mapper.ConfigurationProvider, cancellationToken) ?? throw new NotFoundException(nameof(Category), request.Id);
 	}
 }
