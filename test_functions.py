@@ -1,5 +1,5 @@
 from uuid import UUID
-import os
+import os, sys, math
 
 
 class TestResults:
@@ -161,7 +161,7 @@ class Tracker:
             return None
         return self.tracking[type][-1]
 
-    def display(self):
+    def display(self, screen):
         if not any(len(self.tracking[key]) > 0 for key in self.tracking.keys()):
             print(
                 f"\n{TestResults.bcolors.BOLD}All clear: {TestResults.bcolors.ENDC}Nothing left to track"
@@ -170,7 +170,7 @@ class Tracker:
 
         print("\n\nDisplaying tracked objects which are remaining after the test.")
 
-        max_width = os.get_terminal_size().columns - 20
+        max_width = screen - 20
         for key in self.tracking.keys():
 
             if len(self.tracking[key]) == 0:
@@ -264,3 +264,68 @@ def check_sale(sale1, sale2):
     assert sale1["price"] == sale2["price"], "Incorrect price"
 
     return True
+
+
+async def main(results, tracker):
+    # Try-Except because github action does not have a terminal and will throw an error 
+    try:
+        screen = os.get_terminal_size().columns
+    except:
+        screen = 150
+
+    line = "- " * math.floor(screen / 2)
+
+    title = " TESTING "
+    side_len = round((screen - len(title)) / 2) - 1
+    text_in_line = (
+        "- " * math.floor(side_len / 2)
+        + TestResults.bcolors.HEADER
+        + title
+        + TestResults.bcolors.ENDC
+        + " -" * (math.floor(side_len / 2) + 1)
+    )
+
+    sys.stdout.write(f"\r{text_in_line}\n")
+    sys.stdout.flush()
+
+    print_info = len(sys.argv) > 1 and sys.argv[1] == "stdout"
+
+    for func in results.tests:
+
+        chars = progress_bar(
+            round((results.tests.index(func) + 1) / len(results.tests) * 100)
+        )
+
+        sys.stdout.write(
+            f"\r[ {results.bcolors.OKGREEN}{chars[0]}{results.bcolors.FAIL}{chars[1]}{results.bcolors.ENDC} ] "
+            + f"test {(results.tests.index(func) + 1)} / {len(results.tests)} {func.__name__}                                            "
+            + ("\n" if print_info else "")
+        )
+        sys.stdout.flush()
+
+        x = sys.stdout
+        sys.stdout = None
+
+        if print_info:
+            sys.stdout = x
+
+        try:
+            await func()
+            results.tests_success += 1
+
+        except AssertionError as e:
+            results.add_fail(func, e)
+
+        except Exception as e:
+            results.add_fail(func, e)
+
+        sys.stdout = x
+
+    sys.stdout.write(
+        f"\r[ {results.bcolors.OKGREEN}{progress_bar(100)[0]}{results.bcolors.ENDC} ] "
+        + f"test {(results.tests.index(func) + 1)} / {len(results.tests)} Done!                                           "
+    )
+    sys.stdout.flush()
+    tracker.display(screen)
+    results.display()
+    print(f"\n{line}")
