@@ -4,6 +4,10 @@ Welcome to my test script.
 I didn't get pytest to work so I wrote my own.
 All the custom function required to run this are located in 'test_functions.py'
 
+To run the script, run the command `python <file.py> stdout`
+To see what was printed, run the command `python <file.py> stdout`
+where <file.py> is your python file.
+
 To create a new test:
 1. Create a new async function. 
 2. Add the '@results.add_test' decorator to it.
