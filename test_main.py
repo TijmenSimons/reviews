@@ -12,6 +12,31 @@ To create a new test:
 5. Make sure you use 'assert' to do the test.
 6. Profit
 
+Use the tracker!
+Whenever you add a "something" which needs to be deleted after the test is finished,
+add it to the tracker.
+It is added to the tracker by doing: tracker.add(<group>, <any data>)
+
+After the test is done, it will display everything that is tracked and not deleted.
+
+To delete the something from the tracker again, do: tracker.remove(<group>, <exact data>)
+The <exact data> needs to match the data you want to remove.
+
+So basicly
+
+adding data
+`
+    data = create_data()
+    tracker.add("some", data)
+`
+
+getting data and removing it
+`
+    data = tracker.get_latest("some")
+    remove_data()
+    tracker.remove("some", thing)
+`
+
 Currently the only problem is, is that images are not deleted from the images folder.
 You will have to manually delete them.
 
