@@ -70,4 +70,16 @@ async def test_posts():
     assert len(r) == 100, "Not 100 posts!"
 
 
+@results.add_test
+async def create_data():
+    data = {"id": 1, "message": "Heyyy"}
+    tracker.add("data", data)
+
+
+@results.add_test
+async def remove_data():
+    data = tracker.get_latest("data")
+    tracker.remove("data", data)
+
+
 t = asyncio.run(main(results, tracker))
