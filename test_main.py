@@ -34,7 +34,7 @@ getting data and removing it
 `
     data = tracker.get_latest("some")
     remove_data()
-    tracker.remove("some", thing)
+    tracker.remove("some", data)
 `
 
 Currently the only problem is, is that images are not deleted from the images folder.
