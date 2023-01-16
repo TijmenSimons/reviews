@@ -1,5 +1,7 @@
 from uuid import UUID
-import os, sys, math
+import os
+import sys
+import math
 
 
 class TestResults:
@@ -267,7 +269,7 @@ def check_sale(sale1, sale2):
 
 
 async def main(results, tracker):
-    # Try-Except because github action does not have a terminal and will throw an error 
+    # Try-Except because github action does not have a terminal and will throw an error
     try:
         screen = os.get_terminal_size().columns
     except:

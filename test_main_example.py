@@ -82,4 +82,9 @@ async def remove_data():
     tracker.remove("data", data)
 
 
+@results.add_test
+async def fail_test():
+    assert add_nums(1, 1) == 1, "1 + 1 was NOT 1!?"
+
+
 t = asyncio.run(main(results, tracker))
