@@ -11,16 +11,6 @@ To create a new test:
 4. Test whatever needs to be tested.
 5. Make sure you use 'assert' to do the test.
 6. Profit
-
-Currently the only problem is, is that images are not deleted from the images folder.
-You will have to manually delete them.
-
-Also, tests are usually done when the application is in Development mode.
-That is because when it is in development mode, the authorization is bypassed.
-
-I have not tested everything with the authorization, because I do not have the 
-time to do so. Also because I'd have to test every endpoint multiple times with
-different roles.
 """
 
 
