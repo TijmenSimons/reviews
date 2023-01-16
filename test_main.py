@@ -89,7 +89,8 @@ async def create_image():
     """Should create new image"""
 
     _test_upload_file = Path("..", "base_img.png")
-    _files = {"image": ("base_img.png", _test_upload_file.open("rb"), "image/png")}
+    _files = {
+        "image": ("base_img.png", _test_upload_file.open("rb"), "image/png")}
 
     response = client.post("/api/images?name=Test", files=_files)
     image = json.loads(response.content.decode("utf-8"))
@@ -313,7 +314,8 @@ async def read_one_claims():
     claims = json.loads(response.content.decode("utf-8"))
 
     assert response.status_code != 401, claims["detail"]
-    assert len(claims) == 1, f"Found {len(claims)} claims instead of the expected 1"
+    assert len(
+        claims) == 1, f"Found {len(claims)} claims instead of the expected 1"
 
 
 @results.add_test
@@ -339,14 +341,16 @@ async def read_zero_claims():
     claims = json.loads(response.content.decode("utf-8"))
 
     assert response.status_code != 401, claims["detail"]
-    assert len(claims) == 0, f"Found {len(claims)} claims instead of the expected 0"
+    assert len(
+        claims) == 0, f"Found {len(claims)} claims instead of the expected 0"
 
 
 @results.add_test
 async def create_sale_fail_no_item():
     """Should fail to create claim"""
 
-    new_sale = {"item_id": 0, "buyer": "string", "description": "string", "price": 0}
+    new_sale = {"item_id": 0, "buyer": "string",
+                "description": "string", "price": 0}
 
     response = client.post("/api/sales", json={**new_sale})
     result = json.loads(response.content.decode("utf-8"))
@@ -401,7 +405,8 @@ async def read_zero_unsold_items():
 
     assert response.status_code != 401, items["detail"]
     assert response.status_code == 200, "Error while searching"
-    assert len(items) == 0, f"Searchresult of '{len(items)}' was not the expected 0"
+    assert len(
+        items) == 0, f"Searchresult of '{len(items)}' was not the expected 0"
 
 
 @results.add_test
