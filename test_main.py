@@ -41,6 +41,8 @@ getting data and removing it
     tracker.remove("some", data)
 `
 
+All the tests in this script are written for the FastAPI framework.
+
 Currently the only problem is, is that images are not deleted from the images folder.
 You will have to manually delete them.
 
